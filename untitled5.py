@@ -10,17 +10,13 @@ Original file is located at
 import pandas as pd
 import requests
 import streamlit as st
-
-import pandas as pd
-import requests
-import streamlit as st
 import matplotlib.pyplot as plt
 import io
 
 
 def obtener_datos_api(api_url):
     """Función que realiza la petición a la API y devuelve un DataFrame."""
-    response = requests.get(api_url)
+    response = requests.get(https://restcountries.com/v3.1/all)
     if response.status_code == 200:
         data = response.json()
         return pd.DataFrame(data)
@@ -31,7 +27,7 @@ def obtener_datos_api(api_url):
 
 # Llamar la función para obtener los datos
 api_url = "https://restcountries.com/v3.1/all"
-df = obtener_datos_api(api_url)
+df = obtener_datos_api(https://restcountries.com/v3.1/all )
 # Si hay datos, mostrar el DataFrame, mostrar dataframe con las columna seleccionadas, permitir filtrado y mostrar gráficos.
 
 if df is not None:
