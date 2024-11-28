@@ -16,3 +16,11 @@ st.title('Aplicación Web: Datos desde una API REST')
 # Verificar que la respuesta sea exitosa (código 200)
 df= pd.read_csv('database_titanic.csv')
 st.write(df.head())
+# Selección de columnas y estadísticas
+        df['Nombre'] = df['name'].apply(lambda x: x.get('common') if isinstance(x, dict) else None)
+        df['Región'] = df['region']
+        df['Población'] = df['population']
+        df['Área (km²)'] = df['area']
+        df['Fronteras'] = df['borders'].apply(lambda x: len(x) if isinstance(x, list) else 0)
+        df['Idiomas Oficiales'] = df['languages'].apply(lambda x: len(x) if isinstance(x, dict) else 0)
+        df['Zonas Horarias'] = df['timezones'].apply(lambda x: len(x) if isinstance(x, list) else 0)
