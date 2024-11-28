@@ -11,15 +11,12 @@ import pandas as pd
 import requests
 import streamlit as st
 
-import pandas as pd
-import streamlit as st
-
 # Título de la aplicación
 st.title('Aplicación Web: Datos desde una API REST')
 
 # Cargar el archivo correctamente
 try:
-    df = pd.read_excel('datos_paises_procesados.xlsx')  # Cambiado de read_csv a read_excel
+    df = pd.read_excel('datos_paises_procesados.xlsx') 
     st.write("Archivo cargado exitosamente:")
     st.write(df.head())
 except Exception as e:
