@@ -58,6 +58,15 @@ if df is not None and not df.empty:
     st.write("Transformación exitosa:", df.head())
 else:
     st.error("El DataFrame está vacío o no es válido.")
+    columnas = ['Nombre', 'Región', 'Población', 'Área (km²)', 'Fronteras', 'Idiomas Oficiales', 'Zonas Horarias']
+    # Dataframe para trabajar
+    df_cleaned = df[columnas]
+
+    # Mostrar DataFrame con las columnas seleccionadas
+    st.title("Interacción con los datos")
+    st.header("Mostrar los datos originales")
+    st.dataframe(df_cleaned)
+
 
 
  
