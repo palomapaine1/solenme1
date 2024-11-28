@@ -21,10 +21,6 @@ st.write(df.head())
 if df is not None and not df.empty:
     # Manejo de columnas relevantes con verificaciones
     if 'name' in df.columns:# Título de la aplicación
-
-if df is not None and not df.empty:
-    # Manejo de columnas relevantes
-    if 'name' in df.columns:
         df['Nombre'] = df['name'].apply(lambda x: x.get('common') if isinstance(x, dict) else None)
     else:
         df['Nombre'] = None
