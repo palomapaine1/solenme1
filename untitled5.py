@@ -87,6 +87,69 @@ else:
         df_ordenado = df_seleccionado.sort_values(by=columna_ordenar, ascending=True)
     else:
         df_ordenado = df_seleccionado.sort_values(by=columna_ordenar, ascending=False)
+        # Mostrar el DataFrame ordenado
+    st.write('DataFrame Ordenado:')
+    st.write(df_ordenado)
+    st.subheader("Filtrar Datos")
+    columna_filtro = st.selectbox("Selecciona una columna para filtrar:", df.select_dtypes(include=['number']).columns)
+    if columna_filtro:
+     min_val, max_val = st.slider(
+        f"Selecciona el rango para {columna_filtro}:",
+        float(df[columna_filtro].min()),
+        float(df[columna_filtro].max()),
+        (float(df[columna_filtro].min()), float(df[columna_filtro].max())))
+    df_filtrado = df[(df[columna_filtro] >= min_val) & (df[columna_filtro] <= max_val)]
+    st.write("**Datos Filtrados:**")
+    st.write(df_filtrado)
+
+    # Botón para descargar los datos filtrados
+    st.subheader("Exportar Datos Filtrados")
+    formato = st.radio("Elige el formato para descargar:", ('CSV', 'Excel'))
+
+    @st.cache_data
+    def convertir_a_csv(df):
+        return df.to_csv(index=False).encode('utf-8')
+
+    @st.cache_data
+    def convertir_a_excel(df):
+        import io
+        buffer = io.BytesIO()
+        with pd.ExcelWriter(buffer, engine='xlsxwriter') as writer:
+            df.to_excel(writer, index=False, sheet_name='DatosFiltrados')
+            writer.save()
+        return buffer.getvalue()
+
+    if formato == 'CSV':
+        st.download_button(
+            label="Descargar en CSV",
+            data=convertir_a_csv(df_filtrado),
+            file_name='datos_filtrados.csv',
+            mime='text/csv')
+    else:
+        st.download_button(
+            label="Descargar en Excel",
+            data=convertir_a_excel(df_filtrado),
+            file_name='datos_filtrados.xlsx',
+            mime='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet')
+    # Título de la aplicación
+st.title("Gráficos Interactivos con Streamlit")
+
+# Cargar archivo o usar ejemplo
+st.subheader("Carga de Datos")
+uploaded_file = st.file_uploader("Sube un archivo CSV o Excel:", type=["csv", "xlsx"])
+
+if uploaded_file:
+    try:
+        # Detectar formato y cargar archivo
+        if uploaded_file.name.endswith('.csv'):
+            df = pd.read_csv(uploaded_file)
+        elif uploaded_file.name.endswith('.xlsx'):
+            df = pd.read_excel(uploaded_file)
+        st.success("Archivo cargado exitosamente.")
+    except Exception as e:
+        st.error(f"Error al cargar el archivo: {e}")
+        df = pd.DataFrame()
+else:
 
 
 
