@@ -52,5 +52,11 @@ if 'timezones' in df.columns:
     df['Zonas Horarias'] = df['timezones'].apply(lambda x: len(x) if isinstance(x, list) else 0)
 else:
     df['Zonas Horarias'] = 0
+     # Filtrar columnas seleccionadas
+        columnas = ['Nombre', 'Región', 'Población', 'Área (km²)', 'Fronteras', 'Idiomas Oficiales', 'Zonas Horarias']
+        df_cleaned = df[columnas]
+        
+        st.write("Datos procesados:")
+        st.dataframe(df_cleaned)
 
  
