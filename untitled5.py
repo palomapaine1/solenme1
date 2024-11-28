@@ -14,4 +14,5 @@ import streamlit as st
 # Título de la aplicación
 st.title('Aplicación Web: Datos desde una API REST')
 # Verificar que la respuesta sea exitosa (código 200)
-df= pd.read_csv('database_titanic(1)
+df= pd.read_csv('database_titanic.csv')
+st.write(df.head())
