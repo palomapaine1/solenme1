@@ -13,14 +13,19 @@ import streamlit as st
 
 # Título de la aplicación
 st.title('Aplicación Web: Datos desde una API REST')
-# Verificar que la respuesta sea exitosa (código 200)
-df= pd.read_csv('datos_paises_procesados.xlsx')
-st.write(df.head())
-# Selección de columnas y estadísticas
-# Verificar si las columnas existen antes de operar sobre ellas
+
+# Cargar el archivo correctamente
+try:
+    df = pd.read_excel('datos_paises_procesados.xlsx')  # Asegúrate de usar el lector correcto
+    st.write("Archivo cargado exitosamente:")
+    st.write(df.head())
+except Exception as e:
+    st.error(f"Error al cargar el archivo: {e}")
+    df = None
+
 if df is not None and not df.empty:
-    # Manejo de columnas relevantes con verificaciones
-    if 'name' in df.columns:# Título de la aplicación
+    # Verifica si las columnas necesarias existen
+    if 'name' in df.columns:
         df['Nombre'] = df['name'].apply(lambda x: x.get('common') if isinstance(x, dict) else None)
     else:
         df['Nombre'] = None
@@ -66,6 +71,7 @@ if df is not None and not df.empty:
     st.write(df_cleaned)
 else:
     st.error("El DataFrame está vacío o no es válido.")
+
 
 
 
