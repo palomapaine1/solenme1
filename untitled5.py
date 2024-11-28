@@ -11,20 +11,28 @@ import pandas as pd
 import requests
 import streamlit as st
 
+import pandas as pd
+import streamlit as st
+
 # Título de la aplicación
 st.title('Aplicación Web: Datos desde una API REST')
-# Verificar que la respuesta sea exitosa (código 200)
-df= pd.read_csv('datos_paises_procesados.xlsx')
-st.write(df.head())
-# Selección de columnas y estadísticas
-# Verificar si las columnas existen antes de operar sobre ellas
+
+# Cargar el archivo correctamente
+try:
+    df = pd.read_excel('datos_paises_procesados.xlsx')  # Cambiado de read_csv a read_excel
+    st.write("Archivo cargado exitosamente:")
+    st.write(df.head())
+except Exception as e:
+    st.error(f"Error al cargar el archivo: {e}")
+    df = None
+
 if df is not None and not df.empty:
-    # Manejo de columnas relevantes con verificaciones
+    # Manejo de columnas relevantes
     if 'name' in df.columns:
         df['Nombre'] = df['name'].apply(lambda x: x.get('common') if isinstance(x, dict) else None)
     else:
         df['Nombre'] = None
-    
+
     if 'region' in df.columns:
         df['Región'] = df['region']
     else:
@@ -55,182 +63,17 @@ if df is not None and not df.empty:
     else:
         df['Zonas Horarias'] = 0
 
-    st.write("Transformación exitosa:", df.head())
+    st.write("Transformación exitosa:")
+    st.write(df.head())
+
+    # Selección de columnas
+    columnas = ['Nombre', 'Región', 'Población', 'Área (km²)', 'Fronteras', 'Idiomas Oficiales', 'Zonas Horarias']
+    columnas_presentes = [col for col in columnas if col in df.columns]
+    df_cleaned = df[columnas_presentes]
+    st.write("DataFrame final para trabajar:")
+    st.write(df_cleaned)
 else:
     st.error("El DataFrame está vacío o no es válido.")
-    columnas = ['Nombre', 'Región', 'Población', 'Área (km²)', 'Fronteras', 'Idiomas Oficiales', 'Zonas Horarias']
-    # Dataframe para trabajar
-    df_cleaned = df[columnas]
-
-    # Mostrar DataFrame con las columnas seleccionadas
-    st.title("Interacción con los datos")
-    st.header("Mostrar los datos originales")
-    st.dataframe(df_cleaned)
-    st.header("Selecciona una columna del dataframe utilizando un menú desplegable")
-    columnas = st.multiselect('Selecciona las columnas a visualizar', df_cleaned.columns.tolist(), default=df_cleaned.columns.tolist())
-    df_seleccionado = df_cleaned[columnas]
-    # Mostrar el DataFrame con las columnas seleccionadas
-    st.write('Columna Selecionada:')
-    st.write(df_seleccionado)
-    st.write("Estadísticas de las columnas seleccionadas:")
-    st.write("Media:",)
-    st.write(df_seleccionado.mean(numeric_only=True))
-    st.write("Mediana:",)
-    st.write(df_seleccionado.median(numeric_only=True))
-    st.write("Desviación estándar:",)
-    st.write(df_seleccionado.std(numeric_only=True))
-    columna_ordenar = st.selectbox('Selecciona una columna para ordenar', df_seleccionado.columns)
-    # Control para seleccionar el orden (ascendente o descendente)
-    orden = st.radio('Selecciona el orden:', ('Ascendente', 'Descendente'))
-    # Ordenar el DataFrame según la columna seleccionada y el orden elegido
-    if orden == 'Ascendente':
-        df_ordenado = df_seleccionado.sort_values(by=columna_ordenar, ascending=True)
-    else:
-        df_ordenado = df_seleccionado.sort_values(by=columna_ordenar, ascending=False)
-        # Mostrar el DataFrame ordenado
-    st.write('DataFrame Ordenado:')
-    st.write(df_ordenado)
-    st.subheader("Filtrar Datos")
-    columna_filtro = st.selectbox("Selecciona una columna para filtrar:", df.select_dtypes(include=['number']).columns)
-    if columna_filtro:
-     min_val, max_val = st.slider(
-        f"Selecciona el rango para {columna_filtro}:",
-        float(df[columna_filtro].min()),
-        float(df[columna_filtro].max()),
-        (float(df[columna_filtro].min()), float(df[columna_filtro].max())))
-    df_filtrado = df[(df[columna_filtro] >= min_val) & (df[columna_filtro] <= max_val)]
-    st.write("**Datos Filtrados:**")
-    st.write(df_filtrado)
-
-    # Botón para descargar los datos filtrados
-    st.subheader("Exportar Datos Filtrados")
-    formato = st.radio("Elige el formato para descargar:", ('CSV', 'Excel'))
-
-    @st.cache_data
-    def convertir_a_csv(df):
-        return df.to_csv(index=False).encode('utf-8')
-
-    @st.cache_data
-    def convertir_a_excel(df):
-        import io
-        buffer = io.BytesIO()
-        with pd.ExcelWriter(buffer, engine='xlsxwriter') as writer:
-            df.to_excel(writer, index=False, sheet_name='DatosFiltrados')
-            writer.save()
-        return buffer.getvalue()
-
-    if formato == 'CSV':
-        st.download_button(
-            label="Descargar en CSV",
-            data=convertir_a_csv(df_filtrado),
-            file_name='datos_filtrados.csv',
-            mime='text/csv')
-    else:
-        st.download_button(
-            label="Descargar en Excel",
-            data=convertir_a_excel(df_filtrado),
-            file_name='datos_filtrados.xlsx',
-            mime='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet')
-    # Título de la aplicación
-st.title("Gráficos Interactivos con Streamlit")
-
-# Cargar archivo o usar ejemplo
-st.subheader("Carga de Datos")
-uploaded_file = st.file_uploader("Sube un archivo CSV o Excel:", type=["csv", "xlsx"])
-
-if uploaded_file:
-    try:
-        # Detectar formato y cargar archivo
-        if uploaded_file.name.endswith('.csv'):
-            df = pd.read_csv(uploaded_file)
-        elif uploaded_file.name.endswith('.xlsx'):
-            df = pd.read_excel(uploaded_file)
-        st.success("Archivo cargado exitosamente.")
-    except Exception as e:
-        st.error(f"Error al cargar el archivo: {e}")
-        df = pd.DataFrame()
-else:
-    # Crear un DataFrame de ejemplo si no se sube archivo
-    st.info("Usando datos de ejemplo porque no se subió archivo.")
-    data = {'Categoría': ['A', 'B', 'C', 'D', 'E'],'Valor 1': [10, 20, 30, 40, 50],'Valor 2': [15, 25, 35, 45, 55],'Valor 3': [5, 15, 25, 35, 45],}
-    df = pd.DataFrame(data)
-
-# Verificar si el DataFrame tiene datos
-if df.empty:
-    st.error("No hay datos disponibles. Sube un archivo para continuar.")
-else:
-    # Mostrar los datos originales
-    st.subheader("Datos Originales")
-    st.write(df)
-
-    # Sección de gráficos interactivos
-    st.subheader("Gráficos Interactivos")
-
-    # Selección de tipo de gráfico
-    tipo_grafico = st.selectbox("Selecciona el tipo de gráfico:",
-                                ["Dispersión", "Línea", "Barras", "Histograma", "Pastel"])
-
-    # Selección de variables
-    columnas_numericas = df.select_dtypes(include=['number']).columns
-    if len(columnas_numericas) > 0:
-        columna_x = st.selectbox("Selecciona la columna para el eje X:", columnas_numericas)
-        columna_y = st.selectbox("Selecciona la columna para el eje Y:", columnas_numericas)
-
-        # Ajuste de rango para los ejes
-        st.subheader("Ajustar Rango de los Ejes")
-        rango_x = st.slider("Rango del eje X:",
-                            float(df[columna_x].min()),
-                            float(df[columna_x].max()),
-                            (float(df[columna_x].min()), float(df[columna_x].max())))
-        rango_y = st.slider("Rango del eje Y:",
-                            float(df[columna_y].min()),
-                            float(df[columna_y].max()),
-                            (float(df[columna_y].min()), float(df[columna_y].max())))
-
-        # Crear gráfico
-        fig, ax = plt.subplots()
-        if tipo_grafico == "Dispersión":
-            ax.scatter(df[columna_x], df[columna_y], color='blue', alpha=0.7)
-        elif tipo_grafico == "Línea":
-            ax.plot(df[columna_x], df[columna_y], color='green', marker='o')
-        elif tipo_grafico == "Barras":
-            ax.bar(df[columna_x], df[columna_y], color='orange', alpha=0.7)
-        elif tipo_grafico == "Histograma":
-            ax.hist(df[columna_x], bins=10, color='purple', alpha=0.7)
-            ax.set_ylabel("Frecuencia")
-        elif tipo_grafico == "Pastel":
-            if len(df[columna_x].unique()) <= 10:
-                ax.pie(df[columna_y], labels=df[columna_x], autopct='%1.1f%%')
-                ax.set_aspect('equal')
-            else:
-                st.warning("El gráfico de pastel requiere menos de 10 categorías únicas en el eje X.")
-                st.stop()
-
-        # Ajustar límites
-        ax.set_xlim(rango_x)
-        ax.set_ylim(rango_y)
-
-        # Etiquetas y título
-        if tipo_grafico != "Pastel":
-            ax.set_title(f"{tipo_grafico}: {columna_y} vs {columna_x}")
-            ax.set_xlabel(columna_x)
-            ax.set_ylabel(columna_y)
-
-        # Mostrar gráfico
-        st.pyplot(fig)
-
-        # Descargar gráfico en PNG
-        st.subheader("Descargar Gráfico")
-        buffer = io.BytesIO()
-        fig.savefig(buffer, format='png')
-        buffer.seek(0)
-        st.download_button(
-            label="Descargar gráfico como PNG",
-            data=buffer,
-            file_name="grafico.png",
-            mime="image/png" )
-    else:
-        st.warning("El DataFrame no contiene columnas numéricas para generar gráficos.")
 
 
 
