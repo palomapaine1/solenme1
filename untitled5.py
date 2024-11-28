@@ -13,15 +13,14 @@ import streamlit as st
 
 # Título de la aplicación
 st.title('Aplicación Web: Datos desde una API REST')
-
-# Cargar el archivo correctamente
-try:
-    df = pd.read_excel('datos_paises_procesados.xlsx') 
-    st.write("Archivo cargado exitosamente:")
-    st.write(df.head())
-except Exception as e:
-    st.error(f"Error al cargar el archivo: {e}")
-    df = None
+# Verificar que la respuesta sea exitosa (código 200)
+df= pd.read_csv('datos_paises_procesados.xlsx')
+st.write(df.head())
+# Selección de columnas y estadísticas
+# Verificar si las columnas existen antes de operar sobre ellas
+if df is not None and not df.empty:
+    # Manejo de columnas relevantes con verificaciones
+    if 'name' in df.columns:# Título de la aplicación
 
 if df is not None and not df.empty:
     # Manejo de columnas relevantes
