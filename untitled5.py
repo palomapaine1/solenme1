@@ -79,6 +79,46 @@ if df is not None and not df.empty:
     st.write(df_cleaned)
 else:
     st.error("El DataFrame está vacío o no es válido.")
+     # Mostrar DataFrame con las columnas seleccionadas
+    st.title("Interacción con los datos")
+    st.header("Mostrar los datos originales")
+    st.dataframe(df_cleaned)
+
+    st.header("Selecciona una columna del dataframe utilizando un menú desplegable")
+    columnas = st.multiselect('Selecciona las columnas a visualizar', df_cleaned.columns.tolist(), default=df_cleaned.columns.tolist())
+    df_seleccionado = df_cleaned[columnas]
+    # Mostrar el DataFrame con las columnas seleccionadas
+    st.write('Columna Selecionada:')
+    st.write(df_seleccionado)
+    st.write("Estadísticas de las columnas seleccionadas:")
+    st.write("Media:",)
+    st.write(df_seleccionado.mean(numeric_only=True))
+    st.write("Mediana:",)
+    st.write(df_seleccionado.median(numeric_only=True))
+    st.write("Desviación estándar:",)
+    st.write(df_seleccionado.std(numeric_only=True))
+    columna_ordenar = st.selectbox('Selecciona una columna para ordenar', df_seleccionado.columns)
+    # Control para seleccionar el orden (ascendente o descendente)
+    orden = st.radio('Selecciona el orden:', ('Ascendente', 'Descendente'))
+    # Ordenar el DataFrame según la columna seleccionada y el orden elegido
+    if orden == 'Ascendente':
+        df_ordenado = df_seleccionado.sort_values(by=columna_ordenar, ascending=True)
+    else:
+        df_ordenado = df_seleccionado.sort_values(by=columna_ordenar, ascending=False)
+    # Mostrar el DataFrame ordenado
+    st.write('DataFrame Ordenado:')
+    st.write(df_ordenado)
+    st.subheader("Filtrar Datos")
+    columna_filtro = st.selectbox("Selecciona una columna para filtrar:", df.select_dtypes(include=['number']).columns)
+    if columna_filtro:
+     min_val, max_val = st.slider(
+        f"Selecciona el rango para {columna_filtro}:",
+        float(df[columna_filtro].min()),
+        float(df[columna_filtro].max()),
+        (float(df[columna_filtro].min()), float(df[columna_filtro].max())))
+    df_filtrado = df[(df[columna_filtro] >= min_val) & (df[columna_filtro] <= max_val)]
+    st.write("**Datos Filtrados:**")
+    st.write(df_filtrado)
 
 
 
